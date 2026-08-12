@@ -1,0 +1,17 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "urlPath": "/provider/v1/execute"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "transactionId": "txn-default",
+      "status": "APPROVED",
+      "balance": 10000.00,
+      "executedAt": "2025-03-15T10:30:00Z"
+    }
+  }
+}

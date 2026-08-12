@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/provider/v1/execute",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$[?(@.accountId == 'acc-123456')]" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "transactionId": "txn-789",
+      "status": "APPROVED",
+      "balance": 5500.00,
+      "executedAt": "2025-03-15T10:30:00Z"
+    }
+  }
+}
