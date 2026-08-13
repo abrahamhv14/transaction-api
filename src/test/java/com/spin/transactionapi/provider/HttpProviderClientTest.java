@@ -113,6 +113,24 @@ class HttpProviderClientTest {
         verify(3, postRequestedFor(urlEqualTo("/provider/v1/execute")));
     }
 
+    @Test
+    void treats5xxWithBusinessErrorBodyAsTechnicalFailure() {
+        stubFor(post(urlEqualTo("/provider/v1/execute"))
+                .willReturn(aResponse().withStatus(500).withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                {
+                                  "status": "REJECTED",
+                                  "code": "INSUFFICIENT_FUNDS",
+                                  "message": "Should not be treated as business rejection"
+                                }
+                                """)));
+
+        assertThatThrownBy(() -> client.execute(sampleRequest()))
+                .isInstanceOf(ProviderCommunicationException.class);
+
+        verify(3, postRequestedFor(urlEqualTo("/provider/v1/execute")));
+    }
+
     /**
      * Contexto mínimo anidado para no ser detectado por el component scan de
      * {@link com.spin.transactionapi.TransactionApiApplication} en otros tests.
