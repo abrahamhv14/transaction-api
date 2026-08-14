@@ -19,14 +19,15 @@ consulta con filtros y paginación.
 ### Opción A — Docker Compose (recomendada)
 
 ```bash
-# 1. Levanta un mock del proveedor externo con WireMock standalone,
-#    escuchando en el puerto 9090 (usa los mappings de ./wiremock-mappings)
-docker run -it --rm -p 9090:8080 \
-  -v "$(pwd)/wiremock-mappings:/home/wiremock/mappings" \
-  wiremock/wiremock:3.9.1
+# 1. En una terminal, levanta la API + Postgres + wiremock, 
+# el proyecto esta configurado con las imagenes necesarias basta con ejecutar el siguiente comando:
 
-# 2. En otra terminal, levanta la API + Postgres
 docker compose up --build
+
+# 2. Para detener el proyecto (contenedores):
+
+docker compose down
+
 ```
 
 La API queda disponible en `http://localhost:8080`.
@@ -35,7 +36,11 @@ Swagger UI: `http://localhost:8080/swagger-ui.html`
 ### Opción B — Local con Maven
 
 ```bash
-# Requiere Postgres corriendo localmente (o ajusta DB_URL a H2)
+# 1. Levanta los contenedores Postgres y WireMock:
+
+docker compose up postgres wiremock -d
+
+# 2. Levanta la API con Maven, pasando las variables de entorno necesarias:
 mvn spring-boot:run \
   -DDB_URL=jdbc:postgresql://localhost:5432/transactions_db \
   -DPROVIDER_BASE_URL=http://localhost:9090
@@ -157,13 +162,12 @@ respuestas descontroladamente grandes).
 
 ### Por qué no se sobre-ingenierizó
 
-- No se implementó el proveedor externo real (según el enunciado); se usa
+- No se implementó el proveedor externo real, para ello se usa
   WireMock tanto en tests como para pruebas manuales locales.
-- No se agregó caché, mensajería (Kafka) ni sharding de base de datos: el
-  challenge pide demostrar buenas decisiones de diseño para escalar, no
-  construir la infraestructura completa. Se documentan como próximos pasos
-  naturales dado el contexto de alto volumen.
-
+- No se agregó caché, mensajería (Kafka o RabbitMQ): dado que el
+  challenge no lo pide, sin embargo la arquitectura permite añadirlo fácilmente 
+  en el futuro (por ejemplo, un `TransactionEventPublisher` que publique eventos.
+- 
 ## Testing
 
 - **`TransactionRulesValidatorTest`** — reglas de negocio en aislamiento
@@ -178,11 +182,10 @@ respuestas descontroladamente grandes).
 
 ## Uso de Inteligencia Artificial
 
-Este proyecto (código, estructura, tests y README) fue generado con
-asistencia de **Claude (Anthropic)** a partir del PDF del challenge,
-incluyendo: diseño de la arquitectura en capas, boilerplate de Spring Boot,
-configuración de Resilience4j, y redacción de tests unitarios/integración.
+Este proyecto fue generado con
+asistencia de **Claude (Anthropic)** incluyendo: Optimizacion de codigo, configuración de Resilience4j, 
+y redacción de tests unitarios/integración.
 Las decisiones de diseño (elección de PostgreSQL, separación de
 responsabilidades, manejo de rechazos vs. fallos técnicos, trade-off sobre
 persistir o no transacciones `FAILED`) fueron dirigidas y revisadas
-explícitamente, y puedo explicar cada línea entregada.
+explícitamente.
