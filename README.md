@@ -183,7 +183,8 @@ respuestas descontroladamente grandes).
 ## Uso de Inteligencia Artificial
 
 Este proyecto fue generado con
-asistencia de **Claude (Anthropic)** incluyendo: Optimizacion de codigo, configuración de Resilience4j, 
+asistencia de **Claude (Anthropic) con el IDE Cursor AI** incluyendo:
+Optimizacion de codigo, configuración de Resilience4j, 
 y redacción de tests unitarios/integración.
 Las decisiones de diseño (elección de PostgreSQL, separación de
 responsabilidades, manejo de rechazos vs. fallos técnicos, trade-off sobre
