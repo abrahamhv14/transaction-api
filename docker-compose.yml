@@ -17,18 +17,25 @@ services:
       timeout: 5s
       retries: 5
 
+  wiremock:
+    image: wiremock/wiremock:3.9.1
+    volumes:
+      - ./wiremock-mappings:/home/wiremock/mappings
+    ports:
+      - "9090:8080"
+
   app:
     build: .
     depends_on:
       postgres:
         condition: service_healthy
+      wiremock:
+        condition: service_started
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/transactions_db
       DB_USER: postgres
       DB_PASSWORD: postgres
-      # Apunta a tu mock del proveedor (WireMock, stub, etc.). Ajusta según
-      # cómo lo levantes localmente, ej. host.docker.internal en Docker Desktop.
-      PROVIDER_BASE_URL: http://host.docker.internal:9090
+      PROVIDER_BASE_URL: http://wiremock:8080
     ports:
       - "8080:8080"
 

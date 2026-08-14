@@ -61,14 +61,18 @@ public class HttpProviderClient implements ProviderClient {
             );
 
         } catch (HttpStatusCodeException ex) {
-            // El proveedor respondió con 4XX/5XX -> intentamos leer el body de error de negocio.
+            if (ex.getStatusCode().is5xxServerError()) {
+                // Cualquier 5xx es fallo técnico -> retry/circuit breaker, sin parsear body.
+                throw ex;
+            }
+            // 4xx -> intentamos leer el body como rechazo de negocio.
             ProviderErrorResponse error = parseProviderError(ex);
             if (error != null && error.code() != null) {
                 // Rechazo de negocio explícito (ej. INSUFFICIENT_FUNDS): no es un fallo técnico,
                 // se propaga tal cual y NO debe reintentarse (ver RetryConfig / ignoreExceptions).
                 throw new ProviderRejectedException(error.code(), error.message());
             }
-            throw ex; // 5xx sin body reconocible -> se trata como fallo técnico (retry/circuit breaker)
+            throw ex;
         } catch (ResourceAccessException ex) {
             // Timeout o error de red -> fallo técnico, elegible para retry.
             throw ex;
